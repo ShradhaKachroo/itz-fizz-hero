@@ -1,0 +1,15 @@
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+/**
+ * Resolves static asset URLs safely accounting for GitHub Pages basePath.
+ */
+export function getAssetPath(path: string): string {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+  return `${basePath}${cleanPath}`;
+}
