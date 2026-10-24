@@ -10,10 +10,10 @@ if (typeof window !== "undefined") {
 }
 
 const stats = [
-  { value: "98%", label: "Customer satisfaction", color: "text-amber-500" },
-  { value: "3x", label: "Faster delivery", color: "text-sky-400" },
-  { value: "75%", label: "Cost reduction", color: "text-green-400" },
-  { value: "24/7", label: "Support", color: "text-pink-400" },
+  { value: "98%", label: "Customer satisfaction", color: "text-[#f59e0b]" },
+  { value: "3x", label: "Faster delivery", color: "text-[#38bdf8]" },
+  { value: "75%", label: "Cost reduction", color: "text-[#4ade80]" },
+  { value: "24/7", label: "Support", color: "text-[#f472b6]" },
 ];
 
 export default function Hero() {
@@ -34,7 +34,7 @@ export default function Hero() {
       });
 
       // Stats fade in one by one with a small delay
-      gsap.from(".stat-card", {
+      gsap.from(".stat-box", {
         opacity: 0,
         y: 18,
         duration: 0.6,
@@ -45,16 +45,17 @@ export default function Hero() {
 
       // 2. Scroll Animation (The Core Feature)
       // Pinned for ~300% scroll distance:
-      // First half: car moves left edge -> right edge
-      // Second half: car moves right edge -> left edge back to start
+      // Scrolling DOWN moves car RIGHT. Scrolling UP moves car LEFT.
+      // One-way linear translation, car always points right, no flips or rotations.
       const getTravelDistance = () => {
         const car = carRef.current;
         if (!car) return 600;
-        // Distance to reach the far right edge of the viewport
-        return window.innerWidth - car.offsetWidth - 48;
+        return window.innerWidth - car.offsetWidth;
       };
 
-      const scrollTl = gsap.timeline({
+      gsap.to(carRef.current, {
+        x: getTravelDistance,
+        ease: "none",
         scrollTrigger: {
           trigger: heroRef.current,
           start: "top top",
@@ -64,30 +65,6 @@ export default function Hero() {
           invalidateOnRefresh: true,
         },
       });
-
-      // First half: move from left to right (facing right)
-      scrollTl.to(carRef.current, {
-        x: getTravelDistance,
-        ease: "none",
-        duration: 1,
-      });
-
-      // Turn around to face left
-      scrollTl.set(carRef.current, {
-        scaleX: -1,
-      });
-
-      // Second half: move from right back to left (facing left)
-      scrollTl.to(carRef.current, {
-        x: 0,
-        ease: "none",
-        duration: 1,
-      });
-
-      // Reset facing direction to right
-      scrollTl.set(carRef.current, {
-        scaleX: 1,
-      });
     }, heroRef);
 
     return () => ctx.revert();
@@ -96,11 +73,11 @@ export default function Hero() {
   return (
     <section
       ref={heroRef}
-      className="relative w-full h-screen min-h-screen bg-[#0f172a] text-white flex flex-col justify-between overflow-hidden p-6 sm:p-12 select-none"
+      className="relative w-full h-screen min-h-screen bg-[#0f172a] text-white flex flex-col justify-between overflow-hidden select-none"
     >
-      {/* Top / Center Section: Headline & Stats */}
-      <div className="flex-1 flex flex-col items-center justify-center text-center max-w-6xl mx-auto w-full pt-4">
-        {/* Headline with wide letter-spacing */}
+      {/* Top / Center Area: Headline & Stats (stay visible the whole time) */}
+      <div className="flex-1 flex flex-col items-center justify-center text-center max-w-6xl mx-auto w-full px-6 pt-6">
+        {/* Headline with wide letter-spacing and amber accent on ITZ FIZZ */}
         <h1
           ref={headlineRef}
           className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-[0.25em] sm:tracking-[0.35em] uppercase text-white mb-8 sm:mb-12 leading-tight"
@@ -117,7 +94,7 @@ export default function Hero() {
           {stats.map((stat, i) => (
             <div
               key={i}
-              className="stat-card flex flex-col items-center justify-center p-4 sm:p-5 bg-[#1e293b] border border-slate-700/60 rounded"
+              className="stat-box flex flex-col items-center justify-center p-4 sm:p-5 bg-[#1e293b] border border-slate-700/60 rounded"
             >
               <span className={`text-3xl sm:text-4xl font-extrabold ${stat.color}`}>
                 {stat.value}
@@ -130,73 +107,59 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Bottom Track Area: Flat 2D Car & Flat Road */}
-      <div className="relative w-full pb-6">
-        {/* The Animated Flat 2D Car (origin at center so scaleX flip is seamless) */}
+      {/* Road (Aerial View, full width, solid dark gray with yellow dashed line) */}
+      <div className="relative w-full bg-[#334155] py-4 overflow-hidden">
+        {/* Dashed Center Line (solid yellow, flat, no glow) */}
+        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 border-b-2 border-dashed border-[#facc15]" />
+
+        {/* Flat 2D Top-Down (Aerial View) Car pointing RIGHT */}
         <div
           ref={carRef}
-          className="w-48 sm:w-60 md:w-68 will-change-transform"
-          style={{ transformOrigin: "center center" }}
+          className="relative z-10 w-44 sm:w-56 md:w-64 will-change-transform"
         >
-          {/* Inline Flat 2D Side-View Car SVG */}
           <svg
-            viewBox="0 0 240 90"
+            viewBox="0 0 220 90"
             className="w-full h-auto block select-none pointer-events-none"
             xmlns="http://www.w3.org/2000/svg"
           >
-            {/* Front Headlight (flat solid yellow) */}
-            <polygon points="228,48 236,49 236,55 228,56" fill="#fef08a" />
+            {/* 4 Wheels (small near-black rectangles at the corners) */}
+            <rect x="35" y="4" width="34" height="12" rx="3" fill="#111827" />
+            <rect x="35" y="74" width="34" height="12" rx="3" fill="#111827" />
+            <rect x="150" y="4" width="34" height="12" rx="3" fill="#111827" />
+            <rect x="150" y="74" width="34" height="12" rx="3" fill="#111827" />
 
-            {/* Rear Taillight (flat solid dark red) */}
-            <rect x="4" y="47" width="6" height="8" fill="#991b1b" />
+            {/* Side Mirrors (flat red #ef4444) */}
+            <rect x="142" y="6" width="10" height="7" rx="2" fill="#ef4444" />
+            <rect x="142" y="77" width="10" height="7" rx="2" fill="#ef4444" />
 
-            {/* Main Car Body (solid bright red #ef4444) */}
-            <path
-              d="M 6 56 
-                 L 6 48 
-                 L 20 48 
-                 L 52 40 
-                 L 80 14 
-                 L 145 14 
-                 L 178 40 
-                 L 225 43 
-                 L 236 49 
-                 L 236 64 
-                 L 220 64 
-                 A 18 18 0 0 0 184 64 
-                 L 86 64 
-                 A 18 18 0 0 0 50 64 
-                 L 6 64 Z"
-              fill="#ef4444"
-            />
+            {/* Main Car Body (solid red #ef4444 rounded rectangle) */}
+            <rect x="20" y="14" width="180" height="62" rx="20" fill="#ef4444" />
 
-            {/* Rear Window (flat light blue #bae6fd) */}
-            <polygon
-              points="84,18 120,18 120,38 58,38"
-              fill="#bae6fd"
-            />
+            {/* Headlights (front right, flat yellow #fef08a) */}
+            <rect x="194" y="20" width="6" height="10" rx="2" fill="#fef08a" />
+            <rect x="194" y="60" width="6" height="10" rx="2" fill="#fef08a" />
 
-            {/* Front Window (flat light blue #bae6fd) */}
-            <polygon
-              points="126,18 143,18 172,38 126,38"
-              fill="#bae6fd"
-            />
+            {/* Taillights (rear left, flat dark red #991b1b) */}
+            <rect x="20" y="20" width="4" height="8" rx="1" fill="#991b1b" />
+            <rect x="20" y="62" width="4" height="8" rx="1" fill="#991b1b" />
 
-            {/* Door Handle (flat red accent) */}
-            <rect x="128" y="44" width="12" height="3" fill="#b91c1c" />
+            {/* Cabin / Roof Area (smaller rounded rectangle) */}
+            <rect x="62" y="22" width="92" height="46" rx="8" fill="#dc2626" />
 
-            {/* Rear Wheel (solid dark gray with light gray hub) */}
-            <circle cx="68" cy="64" r="16" fill="#1e293b" />
-            <circle cx="68" cy="64" r="6" fill="#cbd5e1" />
+            {/* Rear Window (light blue #bae6fd) */}
+            <rect x="68" y="26" width="14" height="38" rx="3" fill="#bae6fd" />
 
-            {/* Front Wheel (solid dark gray with light gray hub) */}
-            <circle cx="202" cy="64" r="16" fill="#1e293b" />
-            <circle cx="202" cy="64" r="6" fill="#cbd5e1" />
+            {/* Front Windshield (light blue #bae6fd) */}
+            <rect x="134" y="26" width="16" height="38" rx="4" fill="#bae6fd" />
+
+            {/* Side Windows (light blue #bae6fd) */}
+            <rect x="85" y="23" width="46" height="4" rx="1" fill="#bae6fd" />
+            <rect x="85" y="63" width="46" height="4" rx="1" fill="#bae6fd" />
+
+            {/* Roof Center Panel (solid red #ef4444) */}
+            <rect x="86" y="28" width="44" height="34" rx="3" fill="#ef4444" />
           </svg>
         </div>
-
-        {/* Flat Road Strip (plain solid dark gray strip) */}
-        <div className="w-full h-3 bg-[#334155] mt-1" />
       </div>
     </section>
   );
